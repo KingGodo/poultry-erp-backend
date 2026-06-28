@@ -12,7 +12,7 @@ A comprehensive, enterprise-grade backend API for poultry farm management built 
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/poultry-erp-backend.git
+git clone https://github.com/KingGodo/poultry-erp-backend.git
 
 # Install dependencies
 npm install
