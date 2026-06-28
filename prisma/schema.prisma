@@ -1,0 +1,639 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ============================================================
+// 1. ACCESS CONTROL
+// ============================================================
+
+model Role {
+  id              Int               @id @default(autoincrement())
+  name            String            @unique @db.VarChar(20)
+  description     String?           @db.Text
+  users           User[]
+  rolePermissions RolePermission[]
+  userFarmAccess  UserFarmAccess[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id              Int               @id @default(autoincrement())
+  permissionKey   String            @unique @db.VarChar(100)
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id              BigInt            @id @default(autoincrement())
+  roleId          Int
+  fullName        String            @db.VarChar(150)
+  email           String?           @unique @db.VarChar(150)
+  phone           String?           @unique @db.VarChar(30)
+  passwordHash    String            @db.VarChar(255)
+  status          String            @default("active") @db.VarChar(20)
+  lastLoginAt     DateTime?         @db.Timestamp(0)
+  createdAt       DateTime          @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime          @updatedAt @db.Timestamp(0)
+  
+  role            Role              @relation(fields: [roleId], references: [id])
+  createdFarms    Farm[]            @relation("FarmOwner")
+  createdHouses   House[]           @relation("HouseCreator")
+  createdRuns     Run[]             @relation("RunCreator")
+  createdBatches  Batch[]           @relation("BatchCreator")
+  createdAllocations BatchAllocation[] @relation("AllocationCreator")
+  feedPurchases   FeedPurchase[]    @relation("FeedPurchaseCreator")
+  feedDistributions FeedDistribution[] @relation("FeedDistributionCreator")
+  mortalityRecords MortalityRecord[] @relation("MortalityRecorder")
+  vaccinations    Vaccination[]     @relation("VaccinationAdmin")
+  weightRecords   WeightRecord[]    @relation("WeightRecorder")
+  eggCollections  EggCollection[]   @relation("EggRecorder")
+  sales           Sale[]            @relation("SaleRecorder")
+  expenses        Expense[]         @relation("ExpenseRecorder")
+  inventoryTransactions InventoryTransaction[] @relation("InventoryRecorder")
+  notifications   Notification[]    @relation("NotificationUser")
+  auditLogs       AuditLog[]        @relation("AuditUser")
+  userFarmAccess  UserFarmAccess[]
+  suppliers       Supplier[]        @relation("SupplierCreator")
+  customers       Customer[]        @relation("CustomerCreator")
+  expenseCategories ExpenseCategory[] @relation("CategoryCreator")
+  inventoryItems  InventoryItem[]   @relation("ItemCreator")
+
+  @@map("users")
+}
+
+model Farm {
+  id              BigInt            @id @default(autoincrement())
+  ownerId         BigInt
+  name            String            @db.VarChar(150)
+  location        String?           @db.VarChar(255)
+  contactPhone    String?           @db.VarChar(30)
+  currency        String            @default("USD") @db.VarChar(3)
+  timezone        String            @default("UTC") @db.VarChar(50)
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime          @updatedAt @db.Timestamp(0)
+
+  owner           User              @relation("FarmOwner", fields: [ownerId], references: [id])
+  users           UserFarmAccess[]
+  houses          House[]
+  suppliers       Supplier[]
+  customers       Customer[]
+  batches         Batch[]
+  feedTypes       FeedType[]
+  feedPurchases   FeedPurchase[]
+  feedStock       FeedStock[]
+  feedDistributions FeedDistribution[]
+  mortalityReasons MortalityReason[]
+  mortalityRecords MortalityRecord[]
+  vaccines        Vaccine[]
+  vaccinationSchedules VaccinationSchedule[]
+  vaccinations    Vaccination[]
+  weightRecords   WeightRecord[]
+  eggCollections  EggCollection[]
+  sales           Sale[]
+  expenseCategories ExpenseCategory[]
+  expenses        Expense[]
+  inventoryItems  InventoryItem[]
+  inventoryTransactions InventoryTransaction[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+
+  @@map("farms")
+}
+
+model UserFarmAccess {
+  userId      BigInt
+  farmId      BigInt
+  roleId      Int
+  isDefault   Boolean   @default(false)
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  farm        Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  role        Role      @relation(fields: [roleId], references: [id])
+
+  @@id([userId, farmId])
+  @@map("user_farm_access")
+}
+
+// ============================================================
+// 2. FARM STRUCTURE
+// ============================================================
+
+model House {
+  id          BigInt    @id @default(autoincrement())
+  farmId      BigInt
+  name        String    @db.VarChar(100)
+  description String?   @db.Text
+  isActive    Boolean   @default(true)
+  createdBy   BigInt?
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime  @updatedAt @db.Timestamp(0)
+
+  farm        Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  creator     User?     @relation("HouseCreator", fields: [createdBy], references: [id])
+  runs        Run[]
+
+  @@unique([farmId, name])
+  @@map("houses")
+}
+
+model Run {
+  id            BigInt    @id @default(autoincrement())
+  houseId       BigInt
+  name          String    @db.VarChar(100)
+  capacity      Int
+  currentBirds  Int       @default(0)
+  runType       String    @default("broiler") @db.VarChar(20)
+  status        String    @default("empty") @db.VarChar(20)
+  createdBy     BigInt?
+  createdAt     DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime  @updatedAt @db.Timestamp(0)
+
+  house         House     @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  creator       User?     @relation("RunCreator", fields: [createdBy], references: [id])
+  allocations   BatchAllocation[]
+  feedDistributions FeedDistribution[]
+  mortalityRecords MortalityRecord[]
+  vaccinations  Vaccination[]
+  weightRecords WeightRecord[]
+  eggCollections EggCollection[]
+  sales         Sale[]
+
+  @@unique([houseId, name])
+  @@map("runs")
+}
+
+// ============================================================
+// 3. SUPPLIERS & CUSTOMERS
+// ============================================================
+
+model Supplier {
+  id            BigInt    @id @default(autoincrement())
+  farmId        BigInt
+  name          String    @db.VarChar(150)
+  supplierType  String?   @db.VarChar(30)
+  contactPhone  String?   @db.VarChar(30)
+  contactEmail  String?   @db.VarChar(150)
+  address       String?   @db.VarChar(255)
+  createdBy     BigInt?
+  createdAt     DateTime  @default(now()) @db.Timestamp(0)
+
+  farm          Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  creator       User?     @relation("SupplierCreator", fields: [createdBy], references: [id])
+  batches       Batch[]
+  feedPurchases FeedPurchase[]
+
+  @@map("suppliers")
+}
+
+model Customer {
+  id            BigInt    @id @default(autoincrement())
+  farmId        BigInt
+  name          String    @db.VarChar(150)
+  contactPhone  String?   @db.VarChar(30)
+  contactEmail  String?   @db.VarChar(150)
+  address       String?   @db.VarChar(255)
+  createdBy     BigInt?
+  createdAt     DateTime  @default(now()) @db.Timestamp(0)
+
+  farm          Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  creator       User?     @relation("CustomerCreator", fields: [createdBy], references: [id])
+  sales         Sale[]
+
+  @@map("customers")
+}
+
+// ============================================================
+// 4. BATCH MANAGEMENT
+// ============================================================
+
+model Batch {
+  id               BigInt    @id @default(autoincrement())
+  farmId           BigInt
+  batchCode        String    @db.VarChar(30)
+  breed            String    @db.VarChar(100)
+  batchType        String    @default("broiler") @db.VarChar(20)
+  supplierId       BigInt?
+  arrivalDate      DateTime  @db.Date
+  quantityReceived Int
+  costPerChick     Decimal   @db.Decimal(10,2)
+  totalChickCost   Decimal?  @db.Decimal(12,2)
+  quantityAlive    Int       @default(0)
+  quantityDead     Int       @default(0)
+  quantitySold     Int       @default(0)
+  status           String    @default("active") @db.VarChar(20)
+  createdBy        BigInt?
+  createdAt        DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime  @updatedAt @db.Timestamp(0)
+
+  farm             Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  supplier         Supplier? @relation(fields: [supplierId], references: [id])
+  creator          User?     @relation("BatchCreator", fields: [createdBy], references: [id])
+  allocations      BatchAllocation[]
+  mortalityRecords MortalityRecord[]
+  vaccinationSchedules VaccinationSchedule[]
+  weightRecords    WeightRecord[]
+  eggCollections   EggCollection[]
+  sales            Sale[]
+  expenses         Expense[]
+
+  @@unique([farmId, batchCode])
+  @@map("batches")
+}
+
+model BatchAllocation {
+  id            BigInt    @id @default(autoincrement())
+  batchId       BigInt
+  runId         BigInt
+  quantity      Int
+  allocatedDate DateTime  @default(now()) @db.Date
+  createdBy     BigInt?
+  createdAt     DateTime  @default(now()) @db.Timestamp(0)
+
+  batch         Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  run           Run       @relation(fields: [runId], references: [id])
+  creator       User?     @relation("AllocationCreator", fields: [createdBy], references: [id])
+
+  @@unique([batchId, runId])
+  @@map("batch_allocations")
+}
+
+// ============================================================
+// 5. FEED MANAGEMENT
+// ============================================================
+
+model FeedType {
+  id              Int               @id @default(autoincrement())
+  farmId          BigInt
+  name            String            @db.VarChar(50)
+  category        String?           @db.VarChar(30)
+  purchases       FeedPurchase[]
+  stock           FeedStock?
+  distributions   FeedDistribution[]
+
+  farm            Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@unique([farmId, name])
+  @@map("feed_types")
+}
+
+model FeedPurchase {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  feedTypeId      Int
+  supplierId      BigInt?
+  quantityBags    Decimal   @db.Decimal(10,2)
+  weightPerBagKg  Decimal   @default(50) @db.Decimal(6,2)
+  costPerBag      Decimal   @db.Decimal(10,2)
+  totalCost       Decimal?  @db.Decimal(12,2)
+  purchaseDate    DateTime  @default(now()) @db.Date
+  createdBy       BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  feedType        FeedType  @relation(fields: [feedTypeId], references: [id])
+  supplier        Supplier? @relation(fields: [supplierId], references: [id])
+  creator         User?     @relation("FeedPurchaseCreator", fields: [createdBy], references: [id])
+
+  @@map("feed_purchases")
+}
+
+model FeedStock {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  feedTypeId      Int       @unique
+  quantityBags    Decimal   @default(0) @db.Decimal(10,2)
+  reorderLevel    Decimal   @default(5) @db.Decimal(10,2)
+  updatedAt       DateTime  @updatedAt @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  feedType        FeedType  @relation(fields: [feedTypeId], references: [id])
+
+  @@unique([farmId, feedTypeId])
+  @@map("feed_stock")
+}
+
+model FeedDistribution {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  runId           BigInt
+  feedTypeId      Int
+  quantityBags    Decimal   @db.Decimal(10,2)
+  distributedDate DateTime  @default(now()) @db.Date
+  distributedBy   BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  run             Run       @relation(fields: [runId], references: [id])
+  feedType        FeedType  @relation(fields: [feedTypeId], references: [id])
+  distributor     User?     @relation("FeedDistributionCreator", fields: [distributedBy], references: [id])
+
+  @@map("feed_distributions")
+}
+
+// ============================================================
+// 6. MORTALITY
+// ============================================================
+
+model MortalityReason {
+  id              Int               @id @default(autoincrement())
+  farmId          BigInt
+  code            String            @db.VarChar(30)
+  description     String?           @db.Text
+  records         MortalityRecord[]
+
+  farm            Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@unique([farmId, code])
+  @@map("mortality_reason_codes")
+}
+
+model MortalityRecord {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  runId           BigInt
+  batchId         BigInt
+  quantityDead    Int
+  reasonCodeId    Int?
+  notes           String?   @db.Text
+  recordedDate    DateTime  @default(now()) @db.Date
+  recordedBy      BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  run             Run       @relation(fields: [runId], references: [id])
+  batch           Batch     @relation(fields: [batchId], references: [id])
+  reasonCode      MortalityReason? @relation(fields: [reasonCodeId], references: [id])
+  recorder        User?     @relation("MortalityRecorder", fields: [recordedBy], references: [id])
+
+  @@map("mortality_records")
+}
+
+// ============================================================
+// 7. VACCINATION
+// ============================================================
+
+model Vaccine {
+  id              Int               @id @default(autoincrement())
+  farmId          BigInt
+  name            String            @db.VarChar(100)
+  schedules       VaccinationSchedule[]
+
+  farm            Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@unique([farmId, name])
+  @@map("vaccines")
+}
+
+model VaccinationSchedule {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  batchId         BigInt
+  vaccineId       Int
+  scheduledDay    Int
+  scheduledDate   DateTime  @db.Date
+  status          String    @default("pending") @db.VarChar(20)
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  batch           Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  vaccine         Vaccine   @relation(fields: [vaccineId], references: [id])
+  vaccinations    Vaccination[]
+
+  @@map("vaccination_schedules")
+}
+
+model Vaccination {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  scheduleId      BigInt
+  runId           BigInt?
+  administeredDate DateTime @default(now()) @db.Date
+  dosage          String?   @db.VarChar(50)
+  notes           String?   @db.Text
+  administeredBy  BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  schedule        VaccinationSchedule @relation(fields: [scheduleId], references: [id])
+  run             Run?      @relation(fields: [runId], references: [id])
+  administrator   User?     @relation("VaccinationAdmin", fields: [administeredBy], references: [id])
+
+  @@map("vaccinations")
+}
+
+// ============================================================
+// 8. WEIGHT & EGG TRACKING
+// ============================================================
+
+model WeightRecord {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  runId           BigInt
+  batchId         BigInt
+  weekNumber      Int
+  avgWeightKg     Decimal   @db.Decimal(6,3)
+  sampleSize      Int       @default(0)
+  recordedDate    DateTime  @default(now()) @db.Date
+  recordedBy      BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  run             Run       @relation(fields: [runId], references: [id])
+  batch           Batch     @relation(fields: [batchId], references: [id])
+  recorder        User?     @relation("WeightRecorder", fields: [recordedBy], references: [id])
+
+  @@unique([runId, weekNumber])
+  @@map("weight_records")
+}
+
+model EggCollection {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  runId           BigInt
+  batchId         BigInt
+  quantityCollected Int
+  quantityBroken  Int       @default(0)
+  collectionDate  DateTime  @default(now()) @db.Date
+  recordedBy      BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  run             Run       @relation(fields: [runId], references: [id])
+  batch           Batch     @relation(fields: [batchId], references: [id])
+  recorder        User?     @relation("EggRecorder", fields: [recordedBy], references: [id])
+
+  @@unique([runId, collectionDate])
+  @@map("egg_collections")
+}
+
+// ============================================================
+// 9. SALES
+// ============================================================
+
+model Sale {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  productType     String    @default("bird") @db.VarChar(10)
+  unit            String    @default("bird") @db.VarChar(20)
+  batchId         BigInt?
+  runId           BigInt?
+  customerId      BigInt?
+  quantitySold    Decimal   @db.Decimal(12,2)
+  totalWeightKg   Decimal?  @db.Decimal(10,2)
+  priceBasis      String    @default("per_unit") @db.VarChar(10)
+  unitPrice       Decimal   @db.Decimal(10,2)
+  totalAmount     Decimal?  @db.Decimal(12,2)
+  saleDate        DateTime  @default(now()) @db.Date
+  recordedBy      BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+  deletedAt       DateTime? @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  batch           Batch?    @relation(fields: [batchId], references: [id])
+  run             Run?      @relation(fields: [runId], references: [id])
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  recorder        User?     @relation("SaleRecorder", fields: [recordedBy], references: [id])
+
+  @@map("sales")
+}
+
+// ============================================================
+// 10. EXPENSES
+// ============================================================
+
+model ExpenseCategory {
+  id              Int               @id @default(autoincrement())
+  farmId          BigInt
+  name            String            @db.VarChar(50)
+  createdBy       BigInt?
+  expenses        Expense[]
+
+  farm            Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  creator         User?             @relation("CategoryCreator", fields: [createdBy], references: [id])
+
+  @@unique([farmId, name])
+  @@map("expense_categories")
+}
+
+model Expense {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  batchId         BigInt?
+  categoryId      Int
+  description     String?   @db.Text
+  amount          Decimal   @db.Decimal(12,2)
+  expenseDate     DateTime  @default(now()) @db.Date
+  recordedBy      BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+  deletedAt       DateTime? @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  batch           Batch?    @relation(fields: [batchId], references: [id])
+  category        ExpenseCategory @relation(fields: [categoryId], references: [id])
+  recorder        User?     @relation("ExpenseRecorder", fields: [recordedBy], references: [id])
+
+  @@map("expenses")
+}
+
+// ============================================================
+// 11. INVENTORY
+// ============================================================
+
+model InventoryItem {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  name            String    @db.VarChar(150)
+  category        String?   @db.VarChar(30)
+  unit            String    @default("unit") @db.VarChar(20)
+  quantity        Decimal   @default(0) @db.Decimal(10,2)
+  reorderLevel    Decimal   @default(0) @db.Decimal(10,2)
+  createdBy       BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime  @updatedAt @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  creator         User?     @relation("ItemCreator", fields: [createdBy], references: [id])
+  transactions    InventoryTransaction[]
+
+  @@unique([farmId, name])
+  @@map("inventory_items")
+}
+
+model InventoryTransaction {
+  id              BigInt    @id @default(autoincrement())
+  farmId          BigInt
+  inventoryItemId BigInt
+  transactionType String    @db.VarChar(10)
+  quantity        Decimal   @db.Decimal(10,2)
+  reference       String?   @db.VarChar(150)
+  transactionDate DateTime  @default(now()) @db.Date
+  recordedBy      BigInt?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  farm            Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  item            InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  recorder        User?     @relation("InventoryRecorder", fields: [recordedBy], references: [id])
+
+  @@map("inventory_transactions")
+}
+
+// ============================================================
+// 12. NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id                BigInt    @id @default(autoincrement())
+  farmId            BigInt
+  userId            BigInt?
+  type              String    @db.VarChar(30)
+  title             String    @db.VarChar(150)
+  message           String?   @db.Text
+  relatedEntityType String?   @db.VarChar(50)
+  relatedEntityId   BigInt?
+  isRead            Boolean   @default(false)
+  scheduledFor      DateTime? @db.Timestamp(0)
+  createdAt         DateTime  @default(now()) @db.Timestamp(0)
+
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  user              User?     @relation("NotificationUser", fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+// ============================================================
+// 13. AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id              BigInt    @id @default(autoincrement())
+  userId          BigInt?
+  farmId          BigInt?
+  action          String    @db.VarChar(20)
+  entityType      String    @db.VarChar(50)
+  entityId        BigInt
+  beforeState     Json?
+  afterState      Json?
+  createdAt       DateTime  @default(now()) @db.Timestamp(0)
+
+  user            User?     @relation("AuditUser", fields: [userId], references: [id])
+  farm            Farm?     @relation(fields: [farmId], references: [id])
+
+  @@map("audit_logs")
+}
