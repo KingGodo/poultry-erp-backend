@@ -157,3 +157,42 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+  const permissions = [
+  // ... existing permissions
+  { permissionKey: 'view_farms' },
+  { permissionKey: 'create_farm' },
+  { permissionKey: 'update_farm' },
+  { permissionKey: 'delete_farm' },
+  { permissionKey: 'manage_farm_settings' },
+  { permissionKey: 'view_farm_users' },
+];
+
+// In rolePermissionMap, update:
+const rolePermissionMap = {
+  system_admin: [
+    // ... existing
+    'view_farms',
+    'create_farm',
+    'update_farm',
+    'delete_farm',
+    'manage_farm_settings',
+    'view_farm_users',
+  ],
+  owner: [
+    // ... existing
+    'view_farms',
+    'create_farm',
+    'update_farm',
+    'manage_farm_settings',
+    'view_farm_users',
+  ],
+  manager: [
+    // ... existing
+    'view_farms',
+    'view_farm_users',
+  ],
+  staff: [
+    // no farm permissions
+  ],
+};
