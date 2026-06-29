@@ -68,6 +68,17 @@ async function main() {
     { permissionKey: 'update_run' },
     { permissionKey: 'delete_run' },
     { permissionKey: 'update_run_status' },
+
+    // === Batch Management ===
+    { permissionKey: 'view_batches' },
+    { permissionKey: 'create_batch' },
+    { permissionKey: 'update_batch' },
+    { permissionKey: 'delete_batch' },
+    { permissionKey: 'change_batch_status' },
+    { permissionKey: 'view_allocations' },
+    { permissionKey: 'create_allocation' },
+    { permissionKey: 'update_allocation' },
+    { permissionKey: 'delete_allocation' },
   ];
 
   for (const perm of permissions) {
@@ -112,6 +123,16 @@ async function main() {
       'update_run',
       'delete_run',
       'update_run_status',
+      // Batch Management
+      'view_batches',
+      'create_batch',
+      'update_batch',
+      'delete_batch',
+      'change_batch_status',
+      'view_allocations',
+      'create_allocation',
+      'update_allocation',
+      'delete_allocation',
     ],
     owner: [
       // Financial
@@ -136,6 +157,15 @@ async function main() {
       'create_run',
       'update_run',
       'update_run_status',
+      // Batch Management
+      'view_batches',
+      'create_batch',
+      'update_batch',
+      'change_batch_status',
+      'view_allocations',
+      'create_allocation',
+      'update_allocation',
+      'delete_allocation',
     ],
     manager: [
       // User Management
@@ -149,11 +179,19 @@ async function main() {
       'view_houses',
       'view_runs',
       'update_run_status',
+      // Batch Management
+      'view_batches',
+      'view_allocations',
+      'create_allocation',
+      'update_allocation',
     ],
     staff: [
       // Houses & Runs (read-only)
       'view_houses',
       'view_runs',
+      // Batch Management (read-only)
+      'view_batches',
+      'view_allocations',
     ],
   };
 
