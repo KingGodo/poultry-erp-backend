@@ -2,20 +2,21 @@
 const ApiError = require('../utils/ApiError');
 const prisma = require('../config/prisma');
 
-const checkFarmAccess = (farmIdParam = 'farmId') => {
+const checkFarmAccess = (farmIdParam = 'id') => {  // ← default to 'id'
   return async (req, res, next) => {
     try {
-      // If user is system_admin, grant full access
+      // system_admin bypasses all checks
       if (req.user.role === 'system_admin') {
         return next();
       }
 
-      const farmId = req.params[farmIdParam] || req.body.farm_id;
+      // Look for farm ID in params (with given param name) or body
+      const farmId = req.params[farmIdParam] || req.body.farmId || req.body.farm_id;
       if (!farmId) {
         return next(new ApiError(400, 'Farm ID is required'));
       }
 
-      const userId = req.user.id;
+      const userId = BigInt(req.user.id); // ← convert to BigInt
 
       // Check if user has access to this farm
       const access = await prisma.userFarmAccess.findUnique({
@@ -31,7 +32,7 @@ const checkFarmAccess = (farmIdParam = 'farmId') => {
         return next(new ApiError(403, 'You do not have access to this farm'));
       }
 
-      req.farmId = farmId;
+      req.farmId = BigInt(farmId);
       req.farmRole = access.roleId;
       next();
     } catch (error) {
