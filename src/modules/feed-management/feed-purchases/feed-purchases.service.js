@@ -1,7 +1,8 @@
 const feedPurchaseRepository = require('./feed-purchases.repository');
-const feedStockRepository = require('../feed-stock/feed-stock.repository'); // We'll create later
+const feedStockRepository = require('../feed-stock/feed-stock.repository');
 const userRepository = require('../../users/users.repository');
 const ApiError = require('../../../utils/ApiError');
+const prisma = require('../../../config/prisma'); // ✅ import once at top
 
 class FeedPurchaseService {
   async listPurchases(filters, currentUser) {
@@ -37,6 +38,17 @@ class FeedPurchaseService {
   }
 
   async createPurchase(data, currentUser) {
+    // ✅ Convert purchaseDate to Date object
+    if (data.purchaseDate) {
+      data.purchaseDate = new Date(data.purchaseDate);
+      if (isNaN(data.purchaseDate.getTime())) {
+        throw new ApiError(400, 'Invalid purchase date format');
+      }
+    } else {
+      // Default to today if not provided
+      data.purchaseDate = new Date();
+    }
+
     if (currentUser.role !== 'system_admin' && currentUser.role !== 'owner') {
       throw new ApiError(403, 'You do not have permission to create feed purchases');
     }
@@ -46,15 +58,9 @@ class FeedPurchaseService {
       if (!hasAccess) throw new ApiError(403, 'You do not have access to this farm');
     }
 
-    // Validate feed type exists and belongs to farm
-    // We'll trust FK but could check.
-
     data.createdBy = currentUser.id;
 
-    // Use transaction to create purchase and update stock
-    const prisma = require('../../../config/prisma');
     return prisma.$transaction(async (tx) => {
-      // Create purchase
       const purchase = await tx.feedPurchase.create({
         data,
         include: {
@@ -103,6 +109,14 @@ class FeedPurchaseService {
   }
 
   async updatePurchase(id, data, currentUser) {
+    // ✅ Convert purchaseDate to Date object if provided
+    if (data.purchaseDate) {
+      data.purchaseDate = new Date(data.purchaseDate);
+      if (isNaN(data.purchaseDate.getTime())) {
+        throw new ApiError(400, 'Invalid purchase date format');
+      }
+    }
+
     const purchase = await feedPurchaseRepository.findById(id);
     if (!purchase) throw new ApiError(404, 'Feed purchase not found');
 
@@ -114,10 +128,7 @@ class FeedPurchaseService {
       if (!hasAccess) throw new ApiError(403, 'You do not have access to this feed purchase');
     }
 
-    // If quantity changes, we need to adjust stock
-    // We'll handle that in the service logic.
-    // For simplicity, we'll allow only non-quantity updates.
-    // Better: implement stock correction.
+    // Quantity changes are not allowed (to avoid complex stock adjustments)
     const { quantityBags, ...updateData } = data;
     if (quantityBags !== undefined) {
       throw new ApiError(400, 'Updating quantity requires stock adjustment. Please contact admin.');
@@ -134,8 +145,6 @@ class FeedPurchaseService {
     const purchase = await feedPurchaseRepository.findById(id);
     if (!purchase) throw new ApiError(404, 'Feed purchase not found');
 
-    // Remove the stock added by this purchase
-    const prisma = require('../../../config/prisma');
     return prisma.$transaction(async (tx) => {
       const stock = await tx.feedStock.findUnique({
         where: {
