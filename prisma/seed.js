@@ -32,14 +32,16 @@ async function main() {
   }
   console.log('✅ Roles seeded');
 
-  // 2. Create permissions
+  // 2. Create ALL permissions
   const permissions = [
-    // Existing
+    // === Financial ===
     { permissionKey: 'view_financials' },
     { permissionKey: 'delete_financial_record' },
+
+    // === System ===
     { permissionKey: 'manage_all_farms' },
 
-    // User management
+    // === User Management ===
     { permissionKey: 'view_users' },
     { permissionKey: 'create_user' },
     { permissionKey: 'update_user' },
@@ -47,6 +49,25 @@ async function main() {
     { permissionKey: 'change_role' },
     { permissionKey: 'change_status' },
     { permissionKey: 'manage_farm_access' },
+
+    // === Farm Management ===
+    { permissionKey: 'view_farms' },
+    { permissionKey: 'create_farm' },
+    { permissionKey: 'update_farm' },
+    { permissionKey: 'delete_farm' },
+    { permissionKey: 'manage_farm_settings' },
+    { permissionKey: 'view_farm_users' },
+
+    // === Houses & Runs ===
+    { permissionKey: 'view_houses' },
+    { permissionKey: 'create_house' },
+    { permissionKey: 'update_house' },
+    { permissionKey: 'delete_house' },
+    { permissionKey: 'view_runs' },
+    { permissionKey: 'create_run' },
+    { permissionKey: 'update_run' },
+    { permissionKey: 'delete_run' },
+    { permissionKey: 'update_run_status' },
   ];
 
   for (const perm of permissions) {
@@ -59,12 +80,14 @@ async function main() {
   console.log('✅ Permissions seeded');
 
   // 3. Assign permissions to roles (via RolePermission)
-  // Map role names to permission keys
   const rolePermissionMap = {
     system_admin: [
+      // Financial
       'view_financials',
       'delete_financial_record',
+      // System
       'manage_all_farms',
+      // User Management
       'view_users',
       'create_user',
       'update_user',
@@ -72,22 +95,65 @@ async function main() {
       'change_role',
       'change_status',
       'manage_farm_access',
+      // Farm Management
+      'view_farms',
+      'create_farm',
+      'update_farm',
+      'delete_farm',
+      'manage_farm_settings',
+      'view_farm_users',
+      // Houses & Runs
+      'view_houses',
+      'create_house',
+      'update_house',
+      'delete_house',
+      'view_runs',
+      'create_run',
+      'update_run',
+      'delete_run',
+      'update_run_status',
     ],
     owner: [
+      // Financial
       'view_financials',
+      // User Management
       'view_users',
       'create_user',
       'update_user',
       'change_status',
       'manage_farm_access',
+      // Farm Management
+      'view_farms',
+      'create_farm',
+      'update_farm',
+      'manage_farm_settings',
+      'view_farm_users',
+      // Houses & Runs
+      'view_houses',
+      'create_house',
+      'update_house',
+      'view_runs',
+      'create_run',
+      'update_run',
+      'update_run_status',
     ],
     manager: [
+      // User Management
       'view_users',
       'update_user',
       'change_status',
+      // Farm Management
+      'view_farms',
+      'view_farm_users',
+      // Houses & Runs
+      'view_houses',
+      'view_runs',
+      'update_run_status',
     ],
     staff: [
-      // No user management permissions
+      // Houses & Runs (read-only)
+      'view_houses',
+      'view_runs',
     ],
   };
 
@@ -157,42 +223,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-  const permissions = [
-  // ... existing permissions
-  { permissionKey: 'view_farms' },
-  { permissionKey: 'create_farm' },
-  { permissionKey: 'update_farm' },
-  { permissionKey: 'delete_farm' },
-  { permissionKey: 'manage_farm_settings' },
-  { permissionKey: 'view_farm_users' },
-];
-
-// In rolePermissionMap, update:
-const rolePermissionMap = {
-  system_admin: [
-    // ... existing
-    'view_farms',
-    'create_farm',
-    'update_farm',
-    'delete_farm',
-    'manage_farm_settings',
-    'view_farm_users',
-  ],
-  owner: [
-    // ... existing
-    'view_farms',
-    'create_farm',
-    'update_farm',
-    'manage_farm_settings',
-    'view_farm_users',
-  ],
-  manager: [
-    // ... existing
-    'view_farms',
-    'view_farm_users',
-  ],
-  staff: [
-    // no farm permissions
-  ],
-};
