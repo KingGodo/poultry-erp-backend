@@ -34,10 +34,19 @@ async function main() {
 
   // 2. Create permissions
   const permissions = [
+    // Existing
     { permissionKey: 'view_financials' },
     { permissionKey: 'delete_financial_record' },
-    { permissionKey: 'manage_users' },
-    { permissionKey: 'manage_all_farms' }, // for system_admin only
+    { permissionKey: 'manage_all_farms' },
+
+    // User management
+    { permissionKey: 'view_users' },
+    { permissionKey: 'create_user' },
+    { permissionKey: 'update_user' },
+    { permissionKey: 'delete_user' },
+    { permissionKey: 'change_role' },
+    { permissionKey: 'change_status' },
+    { permissionKey: 'manage_farm_access' },
   ];
 
   for (const perm of permissions) {
@@ -49,7 +58,69 @@ async function main() {
   }
   console.log('✅ Permissions seeded');
 
-  // 3. Create default system admin user (if not exists)
+  // 3. Assign permissions to roles (via RolePermission)
+  // Map role names to permission keys
+  const rolePermissionMap = {
+    system_admin: [
+      'view_financials',
+      'delete_financial_record',
+      'manage_all_farms',
+      'view_users',
+      'create_user',
+      'update_user',
+      'delete_user',
+      'change_role',
+      'change_status',
+      'manage_farm_access',
+    ],
+    owner: [
+      'view_financials',
+      'view_users',
+      'create_user',
+      'update_user',
+      'change_status',
+      'manage_farm_access',
+    ],
+    manager: [
+      'view_users',
+      'update_user',
+      'change_status',
+    ],
+    staff: [
+      // No user management permissions
+    ],
+  };
+
+  // Get all roles and permissions from DB
+  const allRoles = await prisma.role.findMany();
+  const allPermissions = await prisma.permission.findMany();
+  const permMap = {};
+  allPermissions.forEach(p => { permMap[p.permissionKey] = p.id; });
+
+  // For each role, assign permissions
+  for (const role of allRoles) {
+    const permKeys = rolePermissionMap[role.name] || [];
+    for (const key of permKeys) {
+      const permId = permMap[key];
+      if (!permId) continue;
+      await prisma.rolePermission.upsert({
+        where: {
+          roleId_permissionId: {
+            roleId: role.id,
+            permissionId: permId,
+          },
+        },
+        update: {},
+        create: {
+          roleId: role.id,
+          permissionId: permId,
+        },
+      });
+    }
+  }
+  console.log('✅ Role permissions assigned');
+
+  // 4. Create default system admin user (if not exists)
   const adminEmail = 'admin@poultry.com';
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail },
@@ -61,7 +132,7 @@ async function main() {
       where: { name: 'system_admin' },
     });
 
-    const adminUser = await prisma.user.create({
+    await prisma.user.create({
       data: {
         fullName: 'System Administrator',
         email: adminEmail,
@@ -71,10 +142,6 @@ async function main() {
       },
     });
     console.log(`✅ Default admin user created (${adminEmail})`);
-
-    // Optionally, create a default farm for the admin (if needed)
-    // But system_admin can access all farms without explicit assignment.
-    // We'll skip creating a farm for now.
   } else {
     console.log(`ℹ️ Admin user already exists (${adminEmail})`);
   }

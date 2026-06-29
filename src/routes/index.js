@@ -3,11 +3,11 @@ const router = express.Router();
 
 // Import module routes
 const authRoutes = require('../modules/auth/auth.routes');
+const userRoutes = require('../modules/users/users.routes');
 
 // Register routes
 router.use('/auth', authRoutes);
-// Add other module routes as they are built
-// router.use('/users', require('../modules/users/users.routes'));
+router.use('/users', userRoutes);
 // router.use('/farms', require('../modules/farms/farms.routes'));
 
 // Health check
