@@ -16,6 +16,13 @@ const feedPurchaseRoutes = require('../modules/feed-management/feed-purchases/fe
 const feedStockRoutes = require('../modules/feed-management/feed-stock/feed-stock.routes');
 const feedDistributionRoutes = require('../modules/feed-management/feed-distributions/feed-distributions.routes');
 
+// Mortality & Vaccination routes
+const mortalityReasonRoutes = require('../modules/mortality-vaccination/mortality-reasons/mortality-reasons.routes');
+const mortalityRecordRoutes = require('../modules/mortality-vaccination/mortality-records/mortality-records.routes');
+const vaccineRoutes = require('../modules/mortality-vaccination/vaccines/vaccines.routes');
+const vaccinationScheduleRoutes = require('../modules/mortality-vaccination/vaccination-schedules/vaccination-schedules.routes');
+const vaccinationRoutes = require('../modules/mortality-vaccination/vaccinations/vaccinations.routes');
+
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/farms', farmRoutes);
@@ -29,6 +36,12 @@ router.use('/feed-types', feedTypeRoutes);
 router.use('/feed-purchases', feedPurchaseRoutes);
 router.use('/feed-stock', feedStockRoutes);
 router.use('/feed-distributions', feedDistributionRoutes);
+
+router.use('/mortality-reasons', mortalityReasonRoutes);
+router.use('/mortality-records', mortalityRecordRoutes);
+router.use('/vaccines', vaccineRoutes);
+router.use('/vaccination-schedules', vaccinationScheduleRoutes);
+router.use('/vaccinations', vaccinationRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
