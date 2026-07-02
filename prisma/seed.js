@@ -117,6 +117,19 @@ async function main() {
     { permissionKey: 'create_vaccination' },
     { permissionKey: 'update_vaccination' },
     { permissionKey: 'delete_vaccination' },
+
+    // === Customers ===
+    { permissionKey: 'view_customers' },
+    { permissionKey: 'create_customer' },
+    { permissionKey: 'update_customer' },
+    { permissionKey: 'delete_customer' },
+
+    // === Sales ===
+    { permissionKey: 'view_sales' },
+    { permissionKey: 'create_sale' },
+    { permissionKey: 'update_sale' },
+    { permissionKey: 'delete_sale' },
+    { permissionKey: 'view_sales_stats' },
   ];
 
   for (const perm of permissions) {
@@ -207,6 +220,17 @@ async function main() {
       'create_vaccination',
       'update_vaccination',
       'delete_vaccination',
+      // Customers
+      'view_customers',
+      'create_customer',
+      'update_customer',
+      'delete_customer',
+      // Sales
+      'view_sales',
+      'create_sale',
+      'update_sale',
+      'delete_sale',
+      'view_sales_stats',
     ],
     owner: [
       // Financial
@@ -268,6 +292,17 @@ async function main() {
       'view_vaccinations',
       'create_vaccination',
       'update_vaccination',
+      // Customers
+      'view_customers',
+      'create_customer',
+      'update_customer',
+      'delete_customer',
+      // Sales
+      'view_sales',
+      'create_sale',
+      'update_sale',
+      'delete_sale',
+      'view_sales_stats',
     ],
     manager: [
       // User Management
@@ -300,6 +335,14 @@ async function main() {
       'view_vaccination_schedules',
       'view_vaccinations',
       'create_vaccination',
+      // Customers
+      'view_customers',
+      'create_customer',
+      'update_customer',
+      // Sales
+      'view_sales',
+      'create_sale',
+      'view_sales_stats',
     ],
     staff: [
       // Houses & Runs
@@ -319,6 +362,10 @@ async function main() {
       'view_vaccines',
       'view_vaccination_schedules',
       'view_vaccinations',
+      // Customers
+      'view_customers',
+      // Sales
+      'view_sales',
     ],
   };
 

@@ -23,6 +23,9 @@ const vaccineRoutes = require('../modules/mortality-vaccination/vaccines/vaccine
 const vaccinationScheduleRoutes = require('../modules/mortality-vaccination/vaccination-schedules/vaccination-schedules.routes');
 const vaccinationRoutes = require('../modules/mortality-vaccination/vaccinations/vaccinations.routes');
 
+const customerRoutes = require('../modules/customers/customers.routes');
+const saleRoutes = require('../modules/sales/sales.routes');
+
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/farms', farmRoutes);
@@ -42,6 +45,9 @@ router.use('/mortality-records', mortalityRecordRoutes);
 router.use('/vaccines', vaccineRoutes);
 router.use('/vaccination-schedules', vaccinationScheduleRoutes);
 router.use('/vaccinations', vaccinationRoutes);
+
+router.use('/customers', customerRoutes);
+router.use('/sales', saleRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
