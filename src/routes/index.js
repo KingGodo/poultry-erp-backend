@@ -27,6 +27,8 @@ const customerRoutes = require('../modules/customers/customers.routes');
 const saleRoutes = require('../modules/sales/sales.routes');
 const expenseCategoryRoutes = require('../modules/expense-categories/expense-categories.routes');
 const expenseRoutes = require('../modules/expenses/expenses.routes');
+const inventoryItemRoutes = require('../modules/inventory-items/inventory-items.routes');
+const inventoryTransactionRoutes = require('../modules/inventory-transactions/inventory-transactions.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -52,6 +54,8 @@ router.use('/customers', customerRoutes);
 router.use('/sales', saleRoutes);
 router.use('/expense-categories', expenseCategoryRoutes);
 router.use('/expenses', expenseRoutes);
+router.use('/inventory-items', inventoryItemRoutes);
+router.use('/inventory-transactions', inventoryTransactionRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
