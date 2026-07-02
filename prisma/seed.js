@@ -130,6 +130,17 @@ async function main() {
     { permissionKey: 'update_sale' },
     { permissionKey: 'delete_sale' },
     { permissionKey: 'view_sales_stats' },
+
+    // === Expenses ===
+    { permissionKey: 'view_expense_categories' },
+    { permissionKey: 'create_expense_category' },
+    { permissionKey: 'update_expense_category' },
+    { permissionKey: 'delete_expense_category' },
+    { permissionKey: 'view_expenses' },
+    { permissionKey: 'create_expense' },
+    { permissionKey: 'update_expense' },
+    { permissionKey: 'delete_expense' },
+    { permissionKey: 'view_expense_stats' },
   ];
 
   for (const perm of permissions) {
@@ -231,6 +242,16 @@ async function main() {
       'update_sale',
       'delete_sale',
       'view_sales_stats',
+      // Expenses
+      'view_expense_categories',
+      'create_expense_category',
+      'update_expense_category',
+      'delete_expense_category',
+      'view_expenses',
+      'create_expense',
+      'update_expense',
+      'delete_expense',
+      'view_expense_stats',
     ],
     owner: [
       // Financial
@@ -303,6 +324,14 @@ async function main() {
       'update_sale',
       'delete_sale',
       'view_sales_stats',
+      // Expenses
+      'view_expense_categories',
+      'create_expense_category',
+      'update_expense_category',
+      'view_expenses',
+      'create_expense',
+      'update_expense',
+      'view_expense_stats',
     ],
     manager: [
       // User Management
@@ -343,6 +372,10 @@ async function main() {
       'view_sales',
       'create_sale',
       'view_sales_stats',
+      // Expenses
+      'view_expense_categories',
+      'view_expenses',
+      'create_expense',
     ],
     staff: [
       // Houses & Runs
@@ -366,6 +399,9 @@ async function main() {
       'view_customers',
       // Sales
       'view_sales',
+      // Expenses
+      'view_expense_categories',
+      'view_expenses',
     ],
   };
 
