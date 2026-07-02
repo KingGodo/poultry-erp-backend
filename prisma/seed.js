@@ -41,6 +41,9 @@ async function main() {
     // === System ===
     { permissionKey: 'manage_all_farms' },
 
+    // In permissions array
+    { permissionKey: 'view_dashboard' },
+
     // === User Management ===
     { permissionKey: 'view_users' },
     { permissionKey: 'create_user' },
