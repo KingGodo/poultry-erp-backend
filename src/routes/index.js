@@ -25,6 +25,8 @@ const vaccinationRoutes = require('../modules/mortality-vaccination/vaccinations
 
 const customerRoutes = require('../modules/customers/customers.routes');
 const saleRoutes = require('../modules/sales/sales.routes');
+const expenseCategoryRoutes = require('../modules/expense-categories/expense-categories.routes');
+const expenseRoutes = require('../modules/expenses/expenses.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -48,6 +50,8 @@ router.use('/vaccinations', vaccinationRoutes);
 
 router.use('/customers', customerRoutes);
 router.use('/sales', saleRoutes);
+router.use('/expense-categories', expenseCategoryRoutes);
+router.use('/expenses', expenseRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
