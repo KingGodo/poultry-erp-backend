@@ -41,7 +41,7 @@ async function main() {
     // === System ===
     { permissionKey: 'manage_all_farms' },
 
-    // In permissions array
+    // === Dashboard ===
     { permissionKey: 'view_dashboard' },
 
     // === User Management ===
@@ -153,6 +153,11 @@ async function main() {
     { permissionKey: 'view_inventory_transactions' },
     { permissionKey: 'create_inventory_transaction' },
     { permissionKey: 'delete_inventory_transaction' },
+
+    // === Notifications ===
+    { permissionKey: 'view_notifications' },
+    { permissionKey: 'manage_notifications' },
+    { permissionKey: 'delete_notification' },
   ];
 
   for (const perm of permissions) {
@@ -172,6 +177,8 @@ async function main() {
       'delete_financial_record',
       // System
       'manage_all_farms',
+      // Dashboard
+      'view_dashboard',
       // User Management
       'view_users',
       'create_user',
@@ -272,10 +279,16 @@ async function main() {
       'view_inventory_transactions',
       'create_inventory_transaction',
       'delete_inventory_transaction',
+      // Notifications
+      'view_notifications',
+      'manage_notifications',
+      'delete_notification',
     ],
     owner: [
       // Financial
       'view_financials',
+      // Dashboard
+      'view_dashboard',
       // User Management
       'view_users',
       'create_user',
@@ -358,8 +371,12 @@ async function main() {
       'update_inventory_item',
       'view_inventory_transactions',
       'create_inventory_transaction',
+      // Notifications
+      'view_notifications',
     ],
     manager: [
+      // Dashboard
+      'view_dashboard',
       // User Management
       'view_users',
       'update_user',
@@ -406,8 +423,12 @@ async function main() {
       'view_inventory_items',
       'view_inventory_transactions',
       'create_inventory_transaction',
+      // Notifications
+      'view_notifications',
     ],
     staff: [
+      // Dashboard
+      'view_dashboard',
       // Houses & Runs
       'view_houses',
       'view_runs',
@@ -435,6 +456,8 @@ async function main() {
       // Inventory
       'view_inventory_items',
       'view_inventory_transactions',
+      // Notifications
+      'view_notifications',
     ],
   };
 
