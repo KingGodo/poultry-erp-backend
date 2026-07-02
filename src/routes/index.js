@@ -29,6 +29,7 @@ const expenseCategoryRoutes = require('../modules/expense-categories/expense-cat
 const expenseRoutes = require('../modules/expenses/expenses.routes');
 const inventoryItemRoutes = require('../modules/inventory-items/inventory-items.routes');
 const inventoryTransactionRoutes = require('../modules/inventory-transactions/inventory-transactions.routes');
+const dashboardRoutes = require('../modules/dashboard/dashboard.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -56,6 +57,7 @@ router.use('/expense-categories', expenseCategoryRoutes);
 router.use('/expenses', expenseRoutes);
 router.use('/inventory-items', inventoryItemRoutes);
 router.use('/inventory-transactions', inventoryTransactionRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
