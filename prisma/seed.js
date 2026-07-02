@@ -130,6 +130,26 @@ async function main() {
     { permissionKey: 'update_sale' },
     { permissionKey: 'delete_sale' },
     { permissionKey: 'view_sales_stats' },
+
+    // === Expenses ===
+    { permissionKey: 'view_expense_categories' },
+    { permissionKey: 'create_expense_category' },
+    { permissionKey: 'update_expense_category' },
+    { permissionKey: 'delete_expense_category' },
+    { permissionKey: 'view_expenses' },
+    { permissionKey: 'create_expense' },
+    { permissionKey: 'update_expense' },
+    { permissionKey: 'delete_expense' },
+    { permissionKey: 'view_expense_stats' },
+
+    // === Inventory ===
+    { permissionKey: 'view_inventory_items' },
+    { permissionKey: 'create_inventory_item' },
+    { permissionKey: 'update_inventory_item' },
+    { permissionKey: 'delete_inventory_item' },
+    { permissionKey: 'view_inventory_transactions' },
+    { permissionKey: 'create_inventory_transaction' },
+    { permissionKey: 'delete_inventory_transaction' },
   ];
 
   for (const perm of permissions) {
@@ -231,6 +251,24 @@ async function main() {
       'update_sale',
       'delete_sale',
       'view_sales_stats',
+      // Expenses
+      'view_expense_categories',
+      'create_expense_category',
+      'update_expense_category',
+      'delete_expense_category',
+      'view_expenses',
+      'create_expense',
+      'update_expense',
+      'delete_expense',
+      'view_expense_stats',
+      // Inventory
+      'view_inventory_items',
+      'create_inventory_item',
+      'update_inventory_item',
+      'delete_inventory_item',
+      'view_inventory_transactions',
+      'create_inventory_transaction',
+      'delete_inventory_transaction',
     ],
     owner: [
       // Financial
@@ -303,6 +341,20 @@ async function main() {
       'update_sale',
       'delete_sale',
       'view_sales_stats',
+      // Expenses
+      'view_expense_categories',
+      'create_expense_category',
+      'update_expense_category',
+      'view_expenses',
+      'create_expense',
+      'update_expense',
+      'view_expense_stats',
+      // Inventory
+      'view_inventory_items',
+      'create_inventory_item',
+      'update_inventory_item',
+      'view_inventory_transactions',
+      'create_inventory_transaction',
     ],
     manager: [
       // User Management
@@ -343,6 +395,14 @@ async function main() {
       'view_sales',
       'create_sale',
       'view_sales_stats',
+      // Expenses
+      'view_expense_categories',
+      'view_expenses',
+      'create_expense',
+      // Inventory
+      'view_inventory_items',
+      'view_inventory_transactions',
+      'create_inventory_transaction',
     ],
     staff: [
       // Houses & Runs
@@ -366,6 +426,12 @@ async function main() {
       'view_customers',
       // Sales
       'view_sales',
+      // Expenses
+      'view_expense_categories',
+      'view_expenses',
+      // Inventory
+      'view_inventory_items',
+      'view_inventory_transactions',
     ],
   };
 
